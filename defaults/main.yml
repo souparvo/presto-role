@@ -1,0 +1,103 @@
+---
+# default varibales file for role
+
+# Version to install
+presto_version: 0.232
+# Defauls to prestodb
+presto_tarbal_url: "https://repo1.maven.org/maven2/com/facebook/presto/presto-server/{{ presto_version }}/presto-server-{{ presto_version }}.tar.gz"
+
+# prestosql
+# presto_version: 341
+# presto_tarbal_url: "https://repo1.maven.org/maven2/io/prestosql/presto-server/{{ presto_version }}/presto-server-{{ presto_version }}.tar.gz"
+
+presto_id_suffix: prestodb
+
+# User to run presto
+presto_user: presto
+presto_group: "{{ presto_user }}"
+
+# Presto installation directories
+presto_data_dir: /apps/presto/data
+presto_install_dir: /apps/presto/src
+
+presto_config_dir: /etc/presto
+
+# Hostname and port of the coordinator host
+presto_coordinator: true
+presto_coordinator_host: localhost
+presto_coordinator_port: 8080
+
+# Presto environment
+presto_environment: development
+
+# jvm.options heap configuration for coordiantor and workers
+coordinator_jvm_heap: 16
+worker_jvm_heap: 16
+
+# Config files
+node_properties:
+    node.environment: "{{ presto_environment }}"
+    node.id: "{{ inventory_host }}-node-{{ presto_id_suffix }}"
+    node.data: "{{ presto_data_dir }}"
+
+# Coordinator configs
+coordinator_config:
+    coordinator: true
+    node-scheduler.include-coordinator: true
+    http-server.http.port: "{{ presto_coordinator_port }}"
+    query.max-memory: 50GB
+    query.max-memory-per-node: 1GB
+    query.max-total-memory-per-node: 2GB
+    discovery-server.enabled: true
+    discovery.uri: "http://{{ presto_coordinator_host }}:{{ presto_coordinator_port }}"
+
+# Worker configs
+worker_config:
+    coordinator: false
+    http-server.http.port: "{{ presto_coordinator_port }}"
+    query.max-memory: 50GB
+    query.max-memory-per-node: 1GB
+    query.max-total-memory-per-node: 2GB
+    discovery.uri: "http://{{ presto_coordinator_host }}:{{ presto_coordinator_port }}"
+
+# Catalogs
+## Hive
+presto_catalogs:
+    - name: hive
+      configs:
+        connector.name: hive-hadoop2
+        hive.metastore.uri: thrift://example.com:9083
+        hive.config.resources: /etc/hadoop/conf/core-site.xml,/etc/hadoop/conf/hdfs-site.xml
+        hive.hdfs.authentication.type: NONE
+        hive.hdfs.impersonation.enabled: true
+    - name: jmx
+      config:
+        connector.name: jmx
+
+# Files required by presto on remote nodes
+presto_deploy_files:
+
+## Secure configuration
+# @TODO - add password to vault
+
+secure_properties:
+  # http-server.authentication.type: PASSWORD
+  # http-server.https.enabled: "true"
+  # http-server.https.port: 8443
+  # http-server.https.keystore.path: "{{ presto_config_dir }}/keystore.jks"
+  # http-server.https.keystore.key: "{{ presto_keystore_password }}"
+
+password_authenticator:
+  # password-authenticator.name: ldap
+  # ldap.url: ldaps://ldap-server:636
+  # ldap.user-bind-pattern: <Refer below for usage>
+
+# Resource groups
+presto_configure_resource_groups: false
+
+resource_groups:
+  # resource-groups.configuration-manager: file
+  # resource-groups.config-file: etc/resource_groups.json
+
+# assuming installation of openjd-1.8.0k
+presto_java_home: /usr/lib/jvm/java-1.8.0-openjdk

@@ -1,0 +1,21 @@
+---
+
+- name: Template resource-groups.properties
+  template:
+    dest: "{{ presto_config_dir }}/resource-groups.properties"
+    src: resource-groups.properties.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config
+  notify:
+    - Restart service
+
+- name: Template the resource groups mapping file
+  template:
+    dest: "{{ presto_resource_groups_file }}"
+    src: resource_groups.json.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config

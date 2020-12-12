@@ -1,0 +1,19 @@
+---
+
+- name: Download tarbal
+  shell: "wget {{ presto_tarbal_url }} -O {{ presto_tmp_file }}"
+
+- name: Unarchive presto
+  shell: "tar -xzvf {{ presto_tmp_file }} -C {{ presto_install_dir }} --strip-components=1"
+
+- name: Delete temp file
+  shell: "rm -rf {{ presto_tmp_file }}"
+
+- name: Presto user to own folder
+  file:
+    state: directory
+    recurse: yes
+    dest: "{{ presto_install_dir }}"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+

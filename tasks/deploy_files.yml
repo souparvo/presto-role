@@ -1,0 +1,41 @@
+---
+
+- name: Check if destination directories exist
+  stat:
+    path: "{{ item.dest_path }}"
+  register: folders
+  with_items: "{{ presto_deploy_files }}"
+  tags:
+    - config
+    
+# - name: Print results
+#   debug:
+#     msg: "{{ item }}"
+#   loop: "{{ folders.results }}"
+
+- name: Create paths to files if they don't exist
+  file:
+    dest: "{{ item.item.dest_path }}"
+    owner: "{{ item.item.owner | default(presto_user) }}"
+    group: "{{ item.item.group | default(presto_user) }}"
+    mode: 0755
+    force: yes
+    state: directory
+  when: item.stat.exists == false
+  with_items: "{{ folders.results }}"
+  tags:
+    - config
+
+- name: Deploy required files to nodes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest_path }}/{{ item.filename }}"
+    owner: "{{ item.owner | default(presto_user) }}"
+    group: "{{ item.group | default(presto_group) }}"
+    mode: "{{ item.mode | default('0644') }}"
+    remote_src: "{{ item.remote_src | default('no') }}"
+  with_items: "{{ presto_deploy_files }}"
+  notify:
+    - Restart service
+  tags:
+    - config

@@ -1,0 +1,14 @@
+---
+
+- name: Add password authenticator file
+  template:
+    src: password-authenticator.properties.j2
+    dest: "{{ presto_config_dir }}/password-authenticator.properties"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  when: presto_coordinator | bool
+  tags:
+    - config
+  notify:
+    - Restart service
+

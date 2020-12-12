@@ -1,0 +1,19 @@
+{% if presto_coordinator %}-server
+-Xmx{{ coordinator_jvm_heap }}G
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=32M
+-XX:+UseGCOverheadLimit
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:+ExitOnOutOfMemoryError
+-Dpresto-temporarily-allow-java8=true
+{% else %}-server
+-Xmx{{ worker_jvm_heap }}G
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=32M
+-XX:+UseGCOverheadLimit
+-XX:+ExplicitGCInvokesConcurrent
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:+ExitOnOutOfMemoryError
+-Dpresto-temporarily-allow-java8=true
+{% endif %}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Presto {% if presto_coordinator %}Coordinator{% else %}Worker{% endif %} service
+After=syslog.target network.target
+
+[Service]
+Environment="JAVA_HOME={{ presto_java_home }}"
+User={{ presto_user }}
+Type=forking
+ExecStart={{ presto_install_dir }}/bin/launcher start
+ExecStop={{ presto_install_dir }}/bin/launcher stop
+WorkingDirectory={{ presto_install_dir }}/bin/
+Restart=always
+LimitNOFILE={{ max_open_files }}
+
+[Install]
+WantedBy=multi-user.target

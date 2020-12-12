@@ -1,0 +1,13 @@
+---
+# handlers file for nos-na.presto-role
+
+- name: Enable service
+  systemd:
+    name: presto
+    daemon_reload: yes
+    enabled: yes
+
+- name: Restart service
+  systemd:
+    name: presto
+    state: restarted

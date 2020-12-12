@@ -1,0 +1,175 @@
+---
+# tasks file for nos-na.presto-role
+
+## Prepare install
+- name: Create presto user
+  user:
+    name: "{{ presto_user }}"
+    system: yes
+    create_home: yes
+    state: present
+
+- name: Create install folder
+  file:
+    state: directory
+    recurse: yes
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+    mode: 0755
+    path: "{{ presto_install_dir }}"
+
+- name: Create data folder
+  file:
+    state: directory
+    recurse: yes
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+    mode: 0755
+    path: "{{ presto_data_dir }}"
+
+- name: Create config folder
+  file:
+    state: directory
+    recurse: yes
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+    mode: 0755
+    path: "{{ presto_config_dir }}"
+
+- name: Create symlink to etc - /etc/presto
+  file:
+    state: link
+    src: "{{ presto_config_dir }}"
+    dest: /etc/presto
+
+- name: Log folder exists
+  file:
+    state: directory
+    recurse: yes
+    path: "{{ presto_log_dir }}"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+
+- name: Create symlink to log files - /var/log/presto
+  file:
+    state: link
+    src: "{{ presto_log_dir }}"
+    dest: /var/log/presto
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+
+- name: Create symlink to data files - /var/presto
+  file:
+    state: link
+    src: "{{ presto_data_dir }}"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+    dest: /var/presto
+
+## Install
+- name: Install presto
+  include: install.yml
+  when: first_install | bool
+
+# Deploy cert
+- name: Deploy certificate
+  copy:
+    dest: "{{ presto_config_dir }}/{{ presto_cert_file }}"
+    src: "files/{{ presto_cert_file }}"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  when: presto_coordinator
+  notify:
+    - Restart service
+
+## Configure Presto
+
+- name: Template node.properties
+  template:
+    dest: "{{ presto_config_dir }}/node.properties"
+    src: node.properties.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config
+  notify:
+    - Restart service
+
+- name: Template jvm.config
+  template:
+    dest: "{{ presto_config_dir }}/jvm.config"
+    src: jvm.config.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config
+  notify:
+    - Restart service
+
+- name: Template config.properties
+  template:
+    dest: "{{ presto_config_dir }}/config.properties"
+    src: config.properties.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config
+  notify:
+    - Restart service
+
+# Catalogs config
+- name: Create catalog folder
+  file:
+    state: directory
+    recurse: yes
+    path: "{{ presto_install_dir }}/etc/catalog"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  tags:
+    - config
+
+- name: Template catalogs
+  template:
+    dest: "{{ presto_install_dir }}/etc/catalog/{{ item.name }}.properties"
+    src: catalogs.j2
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+  with_items: "{{ presto_catalogs }}"
+  tags:
+    - config
+  notify:
+    - Restart service  
+
+# Deploy files
+- name: Deploy config
+  include: deploy_files.yml
+  when: presto_deploy_files is defined
+
+# Secure config
+- name: Security config
+  include: configure_ldap.yml
+  when: presto_configure_ldap and presto_coordinator
+
+# Resource groups
+- name: Resource groups
+  include: configure_resource_groups.yml
+  when: presto_configure_resource_groups and presto_coordinator
+
+# Own forders
+- name: Presto user to own folder
+  file:
+    state: directory
+    recurse: yes
+    dest: "{{ presto_install_dir }}"
+    owner: "{{ presto_user }}"
+    group: "{{ presto_group }}"
+
+# Presto service
+- name: Template Presto service
+  template:
+    dest: /etc/systemd/system/presto.service
+    src: presto.service.j2
+  notify:
+    - Enable service
+    - Restart service
+

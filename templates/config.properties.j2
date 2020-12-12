@@ -1,0 +1,13 @@
+{% if presto_coordinator %}
+{% for key, value in coordinator_config.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+{% if presto_configure_ldap %}
+{% for key, value in secure_properties.items() %}
+{{ key }}={{ value }}
+{% endfor %}{% endif %}
+{% else %}
+{% for key, value in worker_config.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+{% endif %}
