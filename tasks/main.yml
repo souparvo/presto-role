@@ -1,7 +1,5 @@
 ---
-# tasks file for nos-na.presto-role
 
-## Prepare install
 - name: Create presto user
   user:
     name: "{{ presto_user }}"
@@ -145,7 +143,7 @@
   tags:
     - config
   notify:
-    - Restart service  
+    - Restart service
 
 # Deploy files
 - name: Deploy config
@@ -166,17 +164,20 @@
 - name: Presto user to own folder
   file:
     state: directory
-    recurse: yes
+    recurse: no
     dest: "{{ presto_install_dir }}"
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0755
 
 # Presto service
 - name: Template Presto service
   template:
     dest: /etc/systemd/system/presto.service
     src: presto.service.j2
+    user: root
+    group: root
+    mode: 0644
   notify:
     - Enable service
     - Restart service
-
