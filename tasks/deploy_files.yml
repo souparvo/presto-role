@@ -7,7 +7,7 @@
   with_items: "{{ presto_deploy_files }}"
   tags:
     - config
-    
+
 # - name: Print results
 #   debug:
 #     msg: "{{ item }}"
@@ -21,7 +21,7 @@
     mode: 0755
     force: yes
     state: directory
-  when: item.stat.exists == false
+  when: item.stat.exists | bool
   with_items: "{{ folders.results }}"
   tags:
     - config

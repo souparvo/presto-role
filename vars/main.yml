@@ -3,7 +3,7 @@
 
 presto_tmp_file: /tmp/presto_install.tar.gz
 
-first_install: false
+# first_install: false
 create_certificates: false
 
 max_open_files: 65536

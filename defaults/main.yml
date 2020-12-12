@@ -2,7 +2,7 @@
 # default varibales file for role
 
 # Version to install
-presto_version: 0.232
+presto_version: 0.244.1
 # Defauls to prestodb
 presto_tarbal_url: "https://repo1.maven.org/maven2/com/facebook/presto/presto-server/{{ presto_version }}/presto-server-{{ presto_version }}.tar.gz"
 
@@ -45,9 +45,9 @@ coordinator_config:
     coordinator: true
     node-scheduler.include-coordinator: true
     http-server.http.port: "{{ presto_coordinator_port }}"
-    query.max-memory: 50GB
-    query.max-memory-per-node: 1GB
-    query.max-total-memory-per-node: 2GB
+    query.max-memory: 20GB
+    query.max-memory-per-node: 4GB
+    query.max-total-memory-per-node: 8GB
     discovery-server.enabled: true
     discovery.uri: "http://{{ presto_coordinator_host }}:{{ presto_coordinator_port }}"
 
@@ -55,9 +55,9 @@ coordinator_config:
 worker_config:
     coordinator: false
     http-server.http.port: "{{ presto_coordinator_port }}"
-    query.max-memory: 50GB
-    query.max-memory-per-node: 1GB
-    query.max-total-memory-per-node: 2GB
+    query.max-memory: 20GB
+    query.max-memory-per-node: 4GB
+    query.max-total-memory-per-node: 8GB
     discovery.uri: "http://{{ presto_coordinator_host }}:{{ presto_coordinator_port }}"
 
 # Catalogs
@@ -75,7 +75,7 @@ presto_catalogs:
         connector.name: jmx
 
 # Files required by presto on remote nodes
-presto_deploy_files:
+presto_deploy_files: []
 
 ## Secure configuration
 # @TODO - add password to vault

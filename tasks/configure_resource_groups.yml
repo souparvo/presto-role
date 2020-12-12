@@ -6,6 +6,7 @@
     src: resource-groups.properties.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config
   notify:
@@ -17,5 +18,6 @@
     src: resource_groups.json.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config

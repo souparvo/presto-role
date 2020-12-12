@@ -49,6 +49,7 @@
     path: "{{ presto_log_dir }}"
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
 
 - name: Create symlink to log files - /var/log/presto
   file:
@@ -69,7 +70,7 @@
 ## Install
 - name: Install presto
   include: install.yml
-  when: first_install | bool
+  # when: first_install | bool
 
 # Deploy cert
 - name: Deploy certificate
@@ -78,6 +79,7 @@
     src: "files/{{ presto_cert_file }}"
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0600
   when: presto_coordinator
   notify:
     - Restart service
@@ -90,6 +92,7 @@
     src: node.properties.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config
   notify:
@@ -101,6 +104,7 @@
     src: jvm.config.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config
   notify:
@@ -112,6 +116,7 @@
     src: config.properties.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config
   notify:
@@ -125,6 +130,7 @@
     path: "{{ presto_install_dir }}/etc/catalog"
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   tags:
     - config
 
@@ -134,6 +140,7 @@
     src: catalogs.j2
     owner: "{{ presto_user }}"
     group: "{{ presto_group }}"
+    mode: 0644
   with_items: "{{ presto_catalogs }}"
   tags:
     - config
